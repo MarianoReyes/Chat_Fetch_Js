@@ -1,0 +1,181 @@
+<html>
+  <head> </head>
+  <body>
+    <script type="application/javascript">
+      
+      /*BODY*/
+      document.body.style.backgroundColor = "#f1f2fa";
+
+      /*HEADER*/
+      const header = document.createElement("header"); 
+      const h1 = document.createElement("h1");
+      h1.append("Chat creado por Mariano Reyes");
+      h1.style.color = "white";
+      header.append(h1);
+      header.style.display = "flex";
+      header.style.justifyContent= "center";
+      header.style.backgroundColor="#009545";
+      header.style.boxShadow="5px 5px #ccc";
+      document.body.append(header);
+
+      /*LISTA DE MENSAJES*/
+      const contenedor = document.createElement("div");
+      const ul = document.createElement("ul");
+      ul.style.padding="0 2rem";
+      contenedor.append(ul);
+      contenedor.setAttribute('id','contenedor');
+      contenedor.style.border="2px solid #ccc";
+      contenedor.style.boxShadow="5px 5px #ccc";
+      contenedor.style.margin="1rem 0";
+      contenedor.style.height="80%";
+      contenedor.style.background="#fff";
+      ul.style.maxHeight="95%";
+      ul.style.overflow="auto";
+      document.body.append(contenedor);
+
+      /*Fetch cada 5 segundos*/
+      (function fetch_mensaje() {
+        fetch("https://chat.juanelcaballo.club/messages")
+          .then((response) => {
+            return response.json();
+          })
+          .then((responseInJSON) => {
+            const lis = responseInJSON.map((m) => {
+              const li = document.createElement("li");
+
+              
+
+              /*MENSAJE*/
+              li.style.listStyle="none";
+              const h4 = document.createElement("h4");
+              const span = document.createElement("span");
+              const p = document.createElement("p");
+              const div2 = document.createElement("div");
+              const div3 = document.createElement("div");
+              
+              h4.append(m.sender);
+              h4.style.margin="auto";
+              h4.style.background="#f1f2fa";
+              h4.style.paddingLeft="2rem";
+              h4.style.color="#009545";
+
+              //si es link, pasarlo a un preview de imagen
+              function UrltoImage(url) {
+                  return /.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url);
+              }
+
+              if(UrltoImage(m.message)){
+                
+                const imagen = new Image();
+                imagen.src = m.message;
+                imagen.style.width = '250px';
+                imagen.style.position = 'relative';
+                imagen.style.padding = '18px';
+                
+
+                span.append(m.date);         
+
+                div3.append(p);
+                div3.append(span);
+
+                div2.append(h4);
+                div2.appendChild(imagen);
+                div2.append(div3);
+
+              }
+              else{
+                span.append(m.date);
+                p.append(m.message);
+
+                div3.append(p);
+                div3.append(span);
+
+                div2.append(h4);
+                div2.append(div3);
+              }
+
+              
+
+              div3.style.display="flex";
+              div3.style.alignItems="center";
+              div3.style.justifyContent="flex-end";
+              p.style.marginRight="auto";
+
+              div2.style.borderBottom="2px solid #ccc";
+              div2.style.margin="0.5rem";
+
+              li.append(div2);
+
+              return li;
+            });
+            lis.forEach((li) => {
+              ul.append(li);
+          });
+        });
+
+        
+
+        window.setInterval(fetch_mensaje, 30000);
+
+        
+
+      })();
+
+      /*ENVIAR*/
+      const input = document.createElement("input");
+      const button = document.createElement("button");
+      /*INPUT LIMITADO A 140*/
+      input.maxLength=140;
+      /**/
+      input.setAttribute('id','input');
+      button.setAttribute('id','boton');
+
+      
+      // Execute a function when the user releases a key on the keyboard
+      input.addEventListener("keyup", function(event) {
+        // Number 13 is the "Enter" key on the keyboard
+        if (event.keyCode === 13) {
+          // Cancel the default action, if needed
+          event.preventDefault();
+          // Trigger the button element with a click
+          document.getElementById("boton").click();
+        }
+      });   
+      
+      button.append("Enviar");
+      input.style.width="75%";
+      button.style.width="25%";
+      button.style.backgroundColor="#009545";
+      button.style.color="#fff";
+
+      button.addEventListener("click", function(){ alert("Mensaje enviado!"); });
+
+      const footer = document.createElement("footer");
+      footer.append(input);
+      footer.append(button);
+
+      footer.style.boxShadow="5px 5px #ccc";
+      document.body.append(footer);
+
+      button.addEventListener("click", () => {
+        const json = {
+          id: (Math.random*30000),
+          sender: "Sender",
+          message: input.value,
+          date: new Date().toISOString(),
+        };
+
+        const options = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(json),
+        };
+        fetch("https://chat.juanelcaballo.club/messages", options);
+      });
+
+      
+    </script>
+  </body>
+</html>
